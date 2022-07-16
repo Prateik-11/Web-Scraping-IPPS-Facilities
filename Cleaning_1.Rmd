@@ -1,0 +1,66 @@
+---
+title: "Clean Initial file"
+author: "Prateik Sinha"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+facilities <- read_csv("Facilities_1.csv")
+facilities
+```
+
+```{r}
+facilities_1_clean <- facilities %>%
+  select(-1) %>%
+  separate(`1`, into = c('City', "State"), sep = ',') %>%
+  separate(`2`, into = c('delete_this', "CCN")) %>%
+  select(-delete_this)
+
+colnames(facilities_1_clean)[1] <- 'Name'
+
+facilities_1_clean
+  
+```
+
+```{r}
+write_csv(facilities_1_clean, "facilities_1_clean.csv")
+```
+
+```{r}
+facility_profile <- read_csv("FacilityProfile.csv")
+facility_profile
+```
+
+```{r}
+not_present <- c()
+for (i in facilities_1_clean$CCN) {
+  if (!(i %in% facility_profile$CMS_Certification_Number)) {
+    not_present = c(not_present, i)
+  }
+}
+not_present
+```
+
+```{r}
+facility_profile %>% filter(CMS_Certification_Number == "070019")
+```
+
+```{r}
+new_facilities <- facilities_1_clean %>%
+  filter(CCN %in% not_present)
+new_facilities
+  
+```
+
+```{r}
+write_csv(new_facilities, "new_facilities.csv")
+```
